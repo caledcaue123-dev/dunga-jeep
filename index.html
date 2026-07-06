@@ -108,7 +108,7 @@ function enviar(m, p, s, d) {
     const link = `${urlBase}?m=${encodeURIComponent(m)}&p=${encodeURIComponent(p)}&s=${s}&d=${encodeURIComponent(d)}`;
     
     // 3. Monta a mensagem e abre o WhatsApp
-    const texto = `Olá! Acompanhe seu Jeep ${m}. Veja o status aqui: ${link}`;
+    const texto = `Olá! Acompanhe seu Veículo ${m}. Veja o status aqui: ${link}`;
     window.open(`https://wa.me/?text=${encodeURIComponent(texto)}`, '_blank');
 }
     </script>
