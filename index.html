@@ -54,7 +54,7 @@
 
     <script>
         let veiculos = JSON.parse(localStorage.getItem('dunga_jeep_patio')) || [];
-        const SENHA_CORRETA = "1234";
+        const SENHA_CORRETA = "senha1408";
 
         // Verifica se o dono já logou antes
         window.onload = function() {
@@ -163,7 +163,7 @@
             const desc = v.descricao ? v.descricao : '';
             
             const link = `${urlBase}?m=${encodeURIComponent(v.modelo)}&p=${encodeURIComponent(v.placa)}&s=${v.status}&d=${encodeURIComponent(v.previsao)}&v=${encodeURIComponent(v.valor)}&pg=${v.pagamento}&desc=${encodeURIComponent(desc)}`;
-            window.open(`https://wa.me/?text=${encodeURIComponent('Acompanhe o status e orçamento do seu Jeep: ' + link)}`, '_blank');
+            window.open(`https://wa.me/?text=${encodeURIComponent('Acompanhe o status e orçamento do seu Veículo: ' + link)}`, '_blank');
         }
     </script>
 </body>
