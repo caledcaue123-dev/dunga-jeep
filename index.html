@@ -99,12 +99,13 @@
             localStorage.setItem('dunga_jeep_patio', JSON.stringify(veiculos));
             renderizar();
         }
-
-        function enviar(m, p, s, d) {
-            const link = window.location.href.replace('dono.html', 'cliente.html') + `?m=${m}&p=${p}&s=${s}&d=${d}`;
-            window.open(`https://wa.me/?text=${encodeURIComponent('Acompanhe seu Jeep: ' + link)}`, '_blank');
-        }
-
+// Substitua o trecho de geração do link por este:
+function enviar(m, p, s, d) {
+    // Pega a URL do site atual e adiciona o caminho do cliente.html
+    const urlBase = window.location.href.replace('index.html', 'cliente.html');
+    const link = `${urlBase}?m=${encodeURIComponent(m)}&p=${encodeURIComponent(p)}&s=${s}&d=${encodeURIComponent(d)}`;
+    window.open(`https://wa.me/?text=${encodeURIComponent('Acompanhe seu Jeep: ' + link)}`, '_blank');
+}
         renderizar();
     </script>
 </body>
