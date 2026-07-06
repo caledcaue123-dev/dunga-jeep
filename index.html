@@ -19,7 +19,10 @@
 
     <!-- PAINEL PRINCIPAL -->
     <div id="main-content" class="hidden max-w-md mx-auto space-y-4">
-        <h1 class="text-xl font-bold text-center">🛠️ DUNGA JEEP - ADMIN</h1>
+        <div class="flex justify-between items-center">
+            <h1 class="text-xl font-bold">🛠️ DUNGA JEEP</h1>
+            <button onclick="sair()" class="text-xs bg-red-100 text-red-600 px-2 py-1 rounded">Sair</button>
+        </div>
         
         <!-- DASHBOARD DE ESTATÍSTICAS -->
         <div class="grid grid-cols-3 gap-2 text-center">
@@ -28,10 +31,11 @@
             <div class="bg-emerald-100 p-2 rounded-lg text-[10px] font-bold">PRONTO: <span id="count-pronto">0</span></div>
         </div>
 
-        <!-- FORMULÁRIO COM CAMPOS FINANCEIROS -->
+        <!-- FORMULÁRIO COM DESCRIÇÃO -->
         <form id="formVeiculo" class="bg-white p-4 rounded-xl shadow-sm space-y-3">
             <input type="text" id="modelo" placeholder="Modelo do Jeep" class="w-full p-2 border rounded" required>
             <input type="text" id="placa" placeholder="Placa" class="w-full p-2 border rounded" required>
+            <textarea id="descricao" placeholder="Serviços realizados (ex: Troca de óleo...)" class="w-full p-2 border rounded" rows="2"></textarea>
             <input type="date" id="previsao" class="w-full p-2 border rounded" required>
             
             <div class="grid grid-cols-2 gap-2">
@@ -50,13 +54,28 @@
 
     <script>
         let veiculos = JSON.parse(localStorage.getItem('dunga_jeep_patio')) || [];
-        const SENHA_CORRETA = "SENHA1408";
+        const SENHA_CORRETA = "1234";
+
+        // Verifica se o dono já logou antes
+        window.onload = function() {
+            if(localStorage.getItem('dunga_jeep_logado') === 'true') {
+                document.getElementById('login-screen').classList.add('hidden');
+                document.getElementById('main-content').classList.remove('hidden');
+            }
+            renderizar();
+        }
 
         function verificarLogin() {
             if(document.getElementById('senha').value === SENHA_CORRETA) {
+                localStorage.setItem('dunga_jeep_logado', 'true');
                 document.getElementById('login-screen').classList.add('hidden');
                 document.getElementById('main-content').classList.remove('hidden');
             } else { alert("Senha incorreta!"); }
+        }
+
+        function sair() {
+            localStorage.removeItem('dunga_jeep_logado');
+            window.location.reload();
         }
 
         document.getElementById('formVeiculo').addEventListener('submit', function(e) {
@@ -65,6 +84,7 @@
                 id: Date.now().toString(),
                 modelo: document.getElementById('modelo').value,
                 placa: document.getElementById('placa').value,
+                descricao: document.getElementById('descricao').value,
                 previsao: document.getElementById('previsao').value,
                 valor: document.getElementById('valor').value,
                 pagamento: document.getElementById('pagamento').value,
@@ -84,23 +104,25 @@
                 const corPagamento = v.pagamento === 'pago' ? 'text-emerald-600' : 'text-red-500';
                 const textoPagamento = v.pagamento === 'pago' ? '🟢 Pago' : '🔴 Pendente';
                 const valorFormatado = parseFloat(v.valor).toLocaleString('pt-BR', { minimumFractionDigits: 2 });
+                const descCurta = v.descricao ? v.descricao.substring(0, 30) + '...' : 'Sem descrição';
 
                 document.getElementById('lista-veiculos').innerHTML += `
                     <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm space-y-2">
-                        <div class="flex justify-between">
+                        <div class="flex justify-between items-center">
                             <strong>${v.modelo}</strong>
-                            <button onclick="remover('${v.id}')" class="text-red-400">✕</button>
+                            <button onclick="remover('${v.id}')" class="text-red-400 font-bold">✕</button>
                         </div>
-                        <p class="text-xs text-slate-500">Placa: ${v.placa} | Entrega: ${v.previsao}</p>
+                        <p class="text-[11px] text-slate-500">Placa: ${v.placa} | Entrega: ${v.previsao}</p>
+                        <p class="text-[11px] text-slate-600">Serviço: ${descCurta}</p>
                         <p class="text-xs font-bold ${corPagamento}">Valor: R$ ${valorFormatado} (${textoPagamento})</p>
                         
-                        <div class="mt-2 flex flex-wrap gap-1">
-                            ${v.status !== 'fila' ? `<button onclick="mudar('${v.id}','fila')" class="text-[9px] bg-amber-500 text-white p-1 rounded">Fila</button>` : ''}
-                            ${v.status !== 'oficina' ? `<button onclick="mudar('${v.id}','oficina')" class="text-[9px] bg-blue-500 text-white p-1 rounded">Oficina</button>` : ''}
-                            ${v.status !== 'pronto' ? `<button onclick="mudar('${v.id}','pronto')" class="text-[9px] bg-emerald-500 text-white p-1 rounded">Pronto</button>` : ''}
+                        <div class="mt-3 flex flex-wrap gap-1">
+                            ${v.status !== 'fila' ? `<button onclick="mudar('${v.id}','fila')" class="text-[10px] bg-amber-500 text-white px-2 py-1 rounded shadow">Fila</button>` : ''}
+                            ${v.status !== 'oficina' ? `<button onclick="mudar('${v.id}','oficina')" class="text-[10px] bg-blue-500 text-white px-2 py-1 rounded shadow">Oficina</button>` : ''}
+                            ${v.status !== 'pronto' ? `<button onclick="mudar('${v.id}','pronto')" class="text-[10px] bg-emerald-500 text-white px-2 py-1 rounded shadow">Pronto</button>` : ''}
                             
-                            <button onclick="alternarPagamento('${v.id}')" class="text-[9px] bg-purple-600 text-white p-1 rounded">Mudar Pagamento</button>
-                            <button onclick="enviar('${v.modelo}','${v.placa}','${v.status}','${v.previsao}','${v.valor}','${v.pagamento}')" class="text-[9px] bg-slate-600 text-white p-1 rounded">Link WhatsApp</button>
+                            <button onclick="alternarPagamento('${v.id}')" class="text-[10px] bg-purple-600 text-white px-2 py-1 rounded shadow">Mudar Pgto</button>
+                            <button onclick="enviar('${v.id}')" class="text-[10px] bg-slate-800 text-white px-2 py-1 rounded shadow w-full mt-1">📲 Enviar Link WhatsApp</button>
                         </div>
                     </div>
                 `;
@@ -124,19 +146,25 @@
         }
 
         function remover(id) {
-            veiculos = veiculos.filter(v => v.id !== id);
-            localStorage.setItem('dunga_jeep_patio', JSON.stringify(veiculos));
-            renderizar();
+            if(confirm('Tem certeza que deseja excluir este veículo?')) {
+                veiculos = veiculos.filter(v => v.id !== id);
+                localStorage.setItem('dunga_jeep_patio', JSON.stringify(veiculos));
+                renderizar();
+            }
         }
 
-        function enviar(m, p, s, d, val, pg) {
+        // Função enviar melhorada: busca os dados pelo ID para evitar erros com textos longos
+        function enviar(id) {
+            const v = veiculos.find(v => v.id === id);
+            if(!v) return;
+            
             const urlAtual = window.location.href;
             const urlBase = urlAtual.substring(0, urlAtual.lastIndexOf('/')) + '/cliente.html';
-            const link = `${urlBase}?m=${encodeURIComponent(m)}&p=${encodeURIComponent(p)}&s=${s}&d=${encodeURIComponent(d)}&v=${encodeURIComponent(val)}&pg=${pg}`;
+            const desc = v.descricao ? v.descricao : '';
+            
+            const link = `${urlBase}?m=${encodeURIComponent(v.modelo)}&p=${encodeURIComponent(v.placa)}&s=${v.status}&d=${encodeURIComponent(v.previsao)}&v=${encodeURIComponent(v.valor)}&pg=${v.pagamento}&desc=${encodeURIComponent(desc)}`;
             window.open(`https://wa.me/?text=${encodeURIComponent('Acompanhe o status e orçamento do seu Jeep: ' + link)}`, '_blank');
         }
-
-        renderizar();
     </script>
 </body>
 </html>
