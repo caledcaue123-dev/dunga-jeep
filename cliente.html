@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>Status do Veículo</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-slate-100 font-sans p-4">
+    <div class="max-w-md mx-auto bg-white rounded-xl shadow-md p-6 text-center space-y-6">
+        <h1 class="font-bold">DUNGA JEEP: Acompanhamento</h1>
+        <div class="bg-slate-50 p-4 rounded border">
+            <h2 id="m" class="text-lg font-bold">-</h2>
+            <p id="p" class="text-sm font-mono">-</p>
+            <p id="d" class="text-[10px] font-bold text-emerald-600 mt-2 bg-emerald-100 p-1 rounded inline-block">-</p>
+        </div>
+        
+        <div class="space-y-4 text-left px-4">
+            <div id="step-fila" class="text-slate-300 font-bold">○ Aguardando na Fila</div>
+            <div id="step-oficina" class="text-slate-300 font-bold">○ Em Manutenção</div>
+            <div id="step-pronto" class="text-slate-300 font-bold">○ Pronto para Entrega</div>
+        </div>
+    </div>
+
+    <script>
+        const params = new URLSearchParams(window.location.search);
+        document.getElementById('m').innerText = params.get('m');
+        document.getElementById('p').innerText = params.get('p');
+        
+        const data = params.get('d').split('-');
+        document.getElementById('d').innerText = `📅 Entrega: ${data[2]}/${data[1]}/${data[0]}`;
+
+        const status = params.get('s');
+        const etapas = ['fila', 'oficina', 'pronto'];
+        etapas.forEach((e, i) => {
+            if (etapas.indexOf(status) >= i) {
+                document.getElementById('step-'+e).classList.replace('text-slate-300', 'text-emerald-600');
+                document.getElementById('step-'+e).innerText = document.getElementById('step-'+e).innerText.replace('○', '●');
+            }
+        });
+    </script>
+</body>
+</html>

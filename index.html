@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Painel Dunga Jeep - Admin</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-slate-100 font-sans p-4">
+
+    <div id="login-screen" class="fixed inset-0 bg-slate-900 flex items-center justify-center z-50">
+        <div class="bg-white p-8 rounded-2xl shadow-xl w-full max-w-sm text-center">
+            <h2 class="font-bold text-lg mb-4">🔑 Acesso Admin</h2>
+            <input type="password" id="senha" placeholder="Digite sua senha" class="w-full p-3 border rounded-lg mb-4">
+            <button onclick="verificarLogin()" class="w-full bg-slate-800 text-white p-3 rounded-lg font-bold">ENTRAR</button>
+        </div>
+    </div>
+
+    <div id="main-content" class="hidden max-w-md mx-auto space-y-4">
+        <h1 class="text-xl font-bold text-center">🛠️ DUNGA JEEP - ADMIN</h1>
+        
+        <div class="grid grid-cols-3 gap-2 text-center">
+            <div class="bg-amber-100 p-2 rounded-lg text-[10px] font-bold">FILA: <span id="count-fila">0</span></div>
+            <div class="bg-blue-100 p-2 rounded-lg text-[10px] font-bold">OFICINA: <span id="count-oficina">0</span></div>
+            <div class="bg-emerald-100 p-2 rounded-lg text-[10px] font-bold">PRONTO: <span id="count-pronto">0</span></div>
+        </div>
+
+        <form id="formVeiculo" class="bg-white p-4 rounded-xl shadow-sm space-y-3">
+            <input type="text" id="modelo" placeholder="Modelo do Jeep" class="w-full p-2 border rounded" required>
+            <input type="text" id="placa" placeholder="Placa" class="w-full p-2 border rounded" required>
+            <input type="date" id="previsao" class="w-full p-2 border rounded" required>
+            <button type="submit" class="w-full bg-slate-800 text-white p-2 rounded font-bold uppercase text-sm">Cadastrar</button>
+        </form>
+
+        <div id="lista-veiculos" class="space-y-4 pb-10"></div>
+    </div>
+
+    <script>
+        let veiculos = JSON.parse(localStorage.getItem('dunga_jeep_patio')) || [];
+        const SENHA_CORRETA = "caled"; // Mude sua senha aqui
+
+        function verificarLogin() {
+            if(document.getElementById('senha').value === SENHA_CORRETA) {
+                document.getElementById('login-screen').classList.add('hidden');
+                document.getElementById('main-content').classList.remove('hidden');
+            } else { alert("Senha incorreta!"); }
+        }
+
+        document.getElementById('formVeiculo').addEventListener('submit', function(e) {
+            e.preventDefault();
+            veiculos.push({
+                id: Date.now().toString(),
+                modelo: document.getElementById('modelo').value,
+                placa: document.getElementById('placa').value,
+                previsao: document.getElementById('previsao').value,
+                status: 'fila'
+            });
+            localStorage.setItem('dunga_jeep_patio', JSON.stringify(veiculos));
+            this.reset();
+            renderizar();
+        });
+
+        function renderizar() {
+            document.getElementById('lista-veiculos').innerHTML = "";
+            let stats = { fila: 0, oficina: 0, pronto: 0 };
+
+            veiculos.forEach(v => {
+                stats[v.status]++;
+                document.getElementById('lista-veiculos').innerHTML += `
+                    <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
+                        <div class="flex justify-between">
+                            <strong>${v.modelo}</strong>
+                            <button onclick="remover('${v.id}')" class="text-red-400">✕</button>
+                        </div>
+                        <p class="text-xs text-slate-500">Placa: ${v.placa} | Entrega: ${v.previsao}</p>
+                        <div class="mt-3 flex gap-2">
+                            ${v.status !== 'fila' ? `<button onclick="mudar('${v.id}','fila')" class="text-[9px] bg-amber-500 text-white p-1 rounded">Fila</button>` : ''}
+                            ${v.status !== 'oficina' ? `<button onclick="mudar('${v.id}','oficina')" class="text-[9px] bg-blue-500 text-white p-1 rounded">Oficina</button>` : ''}
+                            ${v.status !== 'pronto' ? `<button onclick="mudar('${v.id}','pronto')" class="text-[9px] bg-emerald-500 text-white p-1 rounded">Pronto</button>` : ''}
+                            <button onclick="enviar('${v.modelo}','${v.placa}','${v.status}','${v.previsao}')" class="text-[9px] bg-slate-600 text-white p-1 rounded">Link WhatsApp</button>
+                        </div>
+                    </div>
+                `;
+            });
+
+            document.getElementById('count-fila').innerText = stats.fila;
+            document.getElementById('count-oficina').innerText = stats.oficina;
+            document.getElementById('count-pronto').innerText = stats.pronto;
+        }
+
+        function mudar(id, status) {
+            veiculos = veiculos.map(v => v.id === id ? {...v, status} : v);
+            localStorage.setItem('dunga_jeep_patio', JSON.stringify(veiculos));
+            renderizar();
+        }
+
+        function remover(id) {
+            veiculos = veiculos.filter(v => v.id !== id);
+            localStorage.setItem('dunga_jeep_patio', JSON.stringify(veiculos));
+            renderizar();
+        }
+
+        function enviar(m, p, s, d) {
+            const link = window.location.href.replace('dono.html', 'cliente.html') + `?m=${m}&p=${p}&s=${s}&d=${d}`;
+            window.open(`https://wa.me/?text=${encodeURIComponent('Acompanhe seu Jeep: ' + link)}`, '_blank');
+        }
+
+        renderizar();
+    </script>
+</body>
+</html>
