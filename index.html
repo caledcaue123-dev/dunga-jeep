@@ -99,14 +99,18 @@
             localStorage.setItem('dunga_jeep_patio', JSON.stringify(veiculos));
             renderizar();
         }
-// Substitua o trecho de geração do link por este:
 function enviar(m, p, s, d) {
-    // Pega a URL do site atual e adiciona o caminho do cliente.html
-    const urlBase = window.location.href.replace('index.html', 'cliente.html');
+    // 1. Pega a URL base (o caminho até a pasta do projeto)
+    const urlAtual = window.location.href;
+    const urlBase = urlAtual.substring(0, urlAtual.lastIndexOf('/')) + '/cliente.html';
+    
+    // 2. Monta o link completo
     const link = `${urlBase}?m=${encodeURIComponent(m)}&p=${encodeURIComponent(p)}&s=${s}&d=${encodeURIComponent(d)}`;
-    window.open(`https://wa.me/?text=${encodeURIComponent('Acompanhe seu Jeep: ' + link)}`, '_blank');
+    
+    // 3. Monta a mensagem e abre o WhatsApp
+    const texto = `Olá! Acompanhe seu Jeep ${m}. Veja o status aqui: ${link}`;
+    window.open(`https://wa.me/?text=${encodeURIComponent(texto)}`, '_blank');
 }
-        renderizar();
     </script>
 </body>
 </html>
