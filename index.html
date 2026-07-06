@@ -7,28 +7,41 @@
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-slate-100 font-sans p-4">
-    
+
+    <!-- TELA DE LOGIN -->
     <div id="login-screen" class="fixed inset-0 bg-slate-900 flex items-center justify-center z-50">
         <div class="bg-white p-8 rounded-2xl shadow-xl w-full max-w-sm text-center">
             <h2 class="font-bold text-lg mb-4">🔑 Acesso Admin</h2>
-            <input type="password" id="senha" placeholder="Digite sua senha" class="w-full p-3 border rounded-lg mb-4">
+            <input type="password" id="senha" placeholder="Digite a senha" class="w-full p-3 border rounded-lg mb-4">
             <button onclick="verificarLogin()" class="w-full bg-slate-800 text-white p-3 rounded-lg font-bold">ENTRAR</button>
         </div>
     </div>
 
+    <!-- PAINEL PRINCIPAL -->
     <div id="main-content" class="hidden max-w-md mx-auto space-y-4">
         <h1 class="text-xl font-bold text-center">🛠️ DUNGA JEEP - ADMIN</h1>
         
+        <!-- DASHBOARD DE ESTATÍSTICAS -->
         <div class="grid grid-cols-3 gap-2 text-center">
             <div class="bg-amber-100 p-2 rounded-lg text-[10px] font-bold">FILA: <span id="count-fila">0</span></div>
             <div class="bg-blue-100 p-2 rounded-lg text-[10px] font-bold">OFICINA: <span id="count-oficina">0</span></div>
             <div class="bg-emerald-100 p-2 rounded-lg text-[10px] font-bold">PRONTO: <span id="count-pronto">0</span></div>
         </div>
 
+        <!-- FORMULÁRIO COM CAMPOS FINANCEIROS -->
         <form id="formVeiculo" class="bg-white p-4 rounded-xl shadow-sm space-y-3">
             <input type="text" id="modelo" placeholder="Modelo do Jeep" class="w-full p-2 border rounded" required>
             <input type="text" id="placa" placeholder="Placa" class="w-full p-2 border rounded" required>
             <input type="date" id="previsao" class="w-full p-2 border rounded" required>
+            
+            <div class="grid grid-cols-2 gap-2">
+                <input type="number" id="valor" placeholder="Valor R$" class="w-full p-2 border rounded" step="0.01" required>
+                <select id="pagamento" class="w-full p-2 border rounded">
+                    <option value="pendente">🔴 Pendente</option>
+                    <option value="pago">🟢 Pago</option>
+                </select>
+            </div>
+            
             <button type="submit" class="w-full bg-slate-800 text-white p-2 rounded font-bold uppercase text-sm">Cadastrar</button>
         </form>
 
@@ -37,7 +50,7 @@
 
     <script>
         let veiculos = JSON.parse(localStorage.getItem('dunga_jeep_patio')) || [];
-        const SENHA_CORRETA = "caled"; // Mude sua senha aqui
+        const SENHA_CORRETA = "1234";
 
         function verificarLogin() {
             if(document.getElementById('senha').value === SENHA_CORRETA) {
@@ -53,6 +66,8 @@
                 modelo: document.getElementById('modelo').value,
                 placa: document.getElementById('placa').value,
                 previsao: document.getElementById('previsao').value,
+                valor: document.getElementById('valor').value,
+                pagamento: document.getElementById('pagamento').value,
                 status: 'fila'
             });
             localStorage.setItem('dunga_jeep_patio', JSON.stringify(veiculos));
@@ -66,18 +81,26 @@
 
             veiculos.forEach(v => {
                 stats[v.status]++;
+                const corPagamento = v.pagamento === 'pago' ? 'text-emerald-600' : 'text-red-500';
+                const textoPagamento = v.pagamento === 'pago' ? '🟢 Pago' : '🔴 Pendente';
+                const valorFormatado = parseFloat(v.valor).toLocaleString('pt-BR', { minimumFractionDigits: 2 });
+
                 document.getElementById('lista-veiculos').innerHTML += `
-                    <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
+                    <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm space-y-2">
                         <div class="flex justify-between">
                             <strong>${v.modelo}</strong>
                             <button onclick="remover('${v.id}')" class="text-red-400">✕</button>
                         </div>
                         <p class="text-xs text-slate-500">Placa: ${v.placa} | Entrega: ${v.previsao}</p>
-                        <div class="mt-3 flex gap-2">
+                        <p class="text-xs font-bold ${corPagamento}">Valor: R$ ${valorFormatado} (${textoPagamento})</p>
+                        
+                        <div class="mt-2 flex flex-wrap gap-1">
                             ${v.status !== 'fila' ? `<button onclick="mudar('${v.id}','fila')" class="text-[9px] bg-amber-500 text-white p-1 rounded">Fila</button>` : ''}
                             ${v.status !== 'oficina' ? `<button onclick="mudar('${v.id}','oficina')" class="text-[9px] bg-blue-500 text-white p-1 rounded">Oficina</button>` : ''}
                             ${v.status !== 'pronto' ? `<button onclick="mudar('${v.id}','pronto')" class="text-[9px] bg-emerald-500 text-white p-1 rounded">Pronto</button>` : ''}
-                            <button onclick="enviar('${v.modelo}','${v.placa}','${v.status}','${v.previsao}')" class="text-[9px] bg-slate-600 text-white p-1 rounded">Link WhatsApp</button>
+                            
+                            <button onclick="alternarPagamento('${v.id}')" class="text-[9px] bg-purple-600 text-white p-1 rounded">Mudar Pagamento</button>
+                            <button onclick="enviar('${v.modelo}','${v.placa}','${v.status}','${v.previsao}','${v.valor}','${v.pagamento}')" class="text-[9px] bg-slate-600 text-white p-1 rounded">Link WhatsApp</button>
                         </div>
                     </div>
                 `;
@@ -94,23 +117,26 @@
             renderizar();
         }
 
+        function alternarPagamento(id) {
+            veiculos = veiculos.map(v => v.id === id ? {...v, pagamento: v.pagamento === 'pago' ? 'pendente' : 'pago'} : v);
+            localStorage.setItem('dunga_jeep_patio', JSON.stringify(veiculos));
+            renderizar();
+        }
+
         function remover(id) {
             veiculos = veiculos.filter(v => v.id !== id);
             localStorage.setItem('dunga_jeep_patio', JSON.stringify(veiculos));
             renderizar();
         }
-function enviar(m, p, s, d) {
-    // 1. Pega a URL base (o caminho até a pasta do projeto)
-    const urlAtual = window.location.href;
-    const urlBase = urlAtual.substring(0, urlAtual.lastIndexOf('/')) + '/cliente.html';
-    
-    // 2. Monta o link completo
-    const link = `${urlBase}?m=${encodeURIComponent(m)}&p=${encodeURIComponent(p)}&s=${s}&d=${encodeURIComponent(d)}`;
-    
-    // 3. Monta a mensagem e abre o WhatsApp
-    const texto = `Olá! Acompanhe seu Veículo ${m}. Veja o status aqui: ${link}`;
-    window.open(`https://wa.me/?text=${encodeURIComponent(texto)}`, '_blank');
-}
+
+        function enviar(m, p, s, d, val, pg) {
+            const urlAtual = window.location.href;
+            const urlBase = urlAtual.substring(0, urlAtual.lastIndexOf('/')) + '/cliente.html';
+            const link = `${urlBase}?m=${encodeURIComponent(m)}&p=${encodeURIComponent(p)}&s=${s}&d=${encodeURIComponent(d)}&v=${encodeURIComponent(val)}&pg=${pg}`;
+            window.open(`https://wa.me/?text=${encodeURIComponent('Acompanhe o status e orçamento do seu Jeep: ' + link)}`, '_blank');
+        }
+
+        renderizar();
     </script>
 </body>
 </html>
