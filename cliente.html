@@ -2,41 +2,88 @@
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
-    <title>Status do Veículo</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Status do seu Jeep - Dunga Jeep</title>
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body class="bg-slate-100 font-sans p-4">
-    <div class="max-w-md mx-auto bg-white rounded-xl shadow-md p-6 text-center space-y-6">
-        <h1 class="font-bold">DUNGA JEEP: Acompanhamento</h1>
-        <div class="bg-slate-50 p-4 rounded border">
-            <h2 id="m" class="text-lg font-bold">-</h2>
-            <p id="p" class="text-sm font-mono">-</p>
-            <p id="d" class="text-[10px] font-bold text-emerald-600 mt-2 bg-emerald-100 p-1 rounded inline-block">-</p>
+<body class="bg-slate-900 text-white font-sans flex items-center justify-center min-h-screen p-4">
+
+    <div class="bg-slate-800 p-6 rounded-2xl shadow-2xl w-full max-w-sm border border-slate-700 text-center space-y-6">
+        <div>
+            <h1 class="text-xl font-bold tracking-wider text-amber-400">DUNGA JEEP</h1>
+            <p class="text-xs text-slate-400 uppercase tracking-widest mt-1">Acompanhamento de Serviço</p>
         </div>
-        
-        <div class="space-y-4 text-left px-4">
-            <div id="step-fila" class="text-slate-300 font-bold">○ Aguardando na Fila</div>
-            <div id="step-oficina" class="text-slate-300 font-bold">○ Em Manutenção</div>
-            <div id="step-pronto" class="text-slate-300 font-bold">○ Pronto para Entrega</div>
+
+        <!-- DADOS DO CARRO -->
+        <div class="bg-slate-850 p-4 rounded-xl border border-slate-700 space-y-1">
+            <h2 id="txt-modelo" class="text-lg font-bold text-white">---</h2>
+            <p id="txt-placa" class="text-sm text-slate-400 font-mono">Placa: ---</p>
+            <p id="txt-previsao" class="text-xs text-slate-400 mt-2">Previsão de entrega: ---</p>
         </div>
+
+        <!-- STATUS ATUAL -->
+        <div class="space-y-2">
+            <p class="text-xs text-slate-400 uppercase font-bold tracking-wider text-left">Status Atual:</p>
+            <div id="status-box" class="p-4 rounded-xl text-lg font-bold uppercase tracking-wide shadow-inner">
+                Carregando...
+            </div>
+        </div>
+
+        <!-- FINANCEIRO DO CLIENTE -->
+        <div class="bg-slate-850 p-4 rounded-xl border border-slate-700 text-left space-y-2">
+            <p class="text-xs text-slate-400 uppercase font-bold tracking-wider">Resumo Financeiro:</p>
+            <div class="flex justify-between items-center">
+                <span class="text-sm text-slate-300">Valor Total:</span>
+                <span id="txt-valor" class="text-base font-bold text-white">R$ 0,00</span>
+            </div>
+            <div class="flex justify-between items-center">
+                <span class="text-sm text-slate-300">Situação:</span>
+                <span id="txt-pagamento" class="text-xs font-bold px-2 py-1 rounded">---</span>
+            </div>
+        </div>
+
+        <p class="text-[10px] text-slate-500">Este link é atualizado automaticamente sempre que você recebe uma nova mensagem.</p>
     </div>
 
     <script>
+        // Captura os dados da URL
         const params = new URLSearchParams(window.location.search);
-        document.getElementById('m').innerText = params.get('m');
-        document.getElementById('p').innerText = params.get('p');
-        
-        const data = params.get('d').split('-');
-        document.getElementById('d').innerText = `📅 Entrega: ${data[2]}/${data[1]}/${data[0]}`;
+        const modelo = params.get('m') || "Não informado";
+        const placa = params.get('p') || "---";
+        const status = params.get('s') || "fila";
+        const previsao = params.get('d') || "---";
+        const valor = params.get('v') || "0.00";
+        const pagamento = params.get('pg') || "pendente";
 
-        const status = params.get('s');
-        const etapas = ['fila', 'oficina', 'pronto'];
-        etapas.forEach((e, i) => {
-            if (etapas.indexOf(status) >= i) {
-                document.getElementById('step-'+e).classList.replace('text-slate-300', 'text-emerald-600');
-                document.getElementById('step-'+e).innerText = document.getElementById('step-'+e).innerText.replace('○', '●');
-            }
-        });
+        // Preenche a tela com os dados recebidos formatando o valor
+        const valorFormatado = parseFloat(valor).toLocaleString('pt-BR', { minimumFractionDigits: 2 });
+        document.getElementById('txt-modelo').innerText = modelo;
+        document.getElementById('txt-placa').innerText = `Placa: ${placa}`;
+        document.getElementById('txt-previsao').innerText = `Previsão de entrega: ${previsao}`;
+        document.getElementById('txt-valor').innerText = `R$ ${valorFormatado}`;
+
+        // Configura o Status Visual
+        const statusBox = document.getElementById('status-box');
+        if (status === 'fila') {
+            statusBox.innerText = "⏳ Na Fila de Espera";
+            statusBox.className = "p-4 rounded-xl text-lg font-bold uppercase tracking-wide bg-amber-500/20 text-amber-400 border border-amber-500/30";
+        } else if (status === 'oficina') {
+            statusBox.innerText = "🔧 Em Manutenção";
+            statusBox.className = "p-4 rounded-xl text-lg font-bold uppercase tracking-wide bg-blue-500/20 text-blue-400 border border-blue-500/30";
+        } else if (status === 'pronto') {
+            statusBox.innerText = "✅ Pronto para Retirar";
+            statusBox.className = "p-4 rounded-xl text-lg font-bold uppercase tracking-wide bg-emerald-500/20 text-emerald-400 border border-emerald-500/30";
+        }
+
+        // Configura o Pagamento Visual
+        const pagBadge = document.getElementById('txt-pagamento');
+        if (pagamento === 'pago') {
+            pagBadge.innerText = "PAGO";
+            pagBadge.className = "text-xs font-bold px-2 py-1 rounded bg-emerald-500/20 text-emerald-400 border border-emerald-500/30";
+        } else {
+            pagBadge.innerText = "AGUARDANDO PAGAMENTO";
+            pagBadge.className = "text-xs font-bold px-2 py-1 rounded bg-red-500/20 text-red-400 border border-red-500/30";
+        }
     </script>
 </body>
 </html>
