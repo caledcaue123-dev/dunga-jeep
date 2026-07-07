@@ -8,6 +8,7 @@
 </head>
 <body class="bg-slate-100 font-sans p-4">
 
+    <!-- TELA DE LOGIN -->
     <div id="login-screen" class="fixed inset-0 bg-slate-900 flex items-center justify-center z-50">
         <div class="bg-white p-8 rounded-2xl shadow-xl w-full max-w-sm text-center">
             <h2 class="font-bold text-lg mb-4">🔑 Acesso Admin</h2>
@@ -16,19 +17,23 @@
         </div>
     </div>
 
+    <!-- PAINEL PRINCIPAL -->
     <div id="main-content" class="hidden max-w-md mx-auto space-y-4">
         
+        <!-- CABEÇALHO -->
         <div class="flex justify-between items-center bg-white p-3 rounded-xl shadow-sm">
             <h1 class="text-lg font-bold">🛠️ DUNGA JEEP</h1>
             <button onclick="sair()" class="text-xs bg-red-100 text-red-600 px-3 py-1 rounded font-bold">Sair</button>
         </div>
 
+        <!-- ABAS DE NAVEGAÇÃO -->
         <div class="flex gap-1 overflow-x-auto pb-1">
             <button onclick="mudarAba('servicos')" id="aba-servicos" class="flex-1 bg-slate-800 text-white p-2 rounded-lg font-bold text-xs shadow transition-all whitespace-nowrap">Serviços</button>
             <button onclick="mudarAba('estoque')" id="aba-estoque" class="flex-1 bg-slate-300 text-slate-700 p-2 rounded-lg font-bold text-xs shadow transition-all whitespace-nowrap">📦 Estoque</button>
             <button onclick="mudarAba('relatorios')" id="aba-relatorios" class="flex-1 bg-slate-300 text-slate-700 p-2 rounded-lg font-bold text-xs shadow transition-all whitespace-nowrap">📊 Faturamento</button>
         </div>
         
+        <!-- ================= ABA 1: SERVIÇOS ================= -->
         <div id="tela-servicos" class="space-y-4">
             <div class="grid grid-cols-3 gap-2 text-center">
                 <div class="bg-amber-100 p-2 rounded-lg text-[10px] font-bold">FILA: <span id="count-fila">0</span></div>
@@ -36,11 +41,13 @@
                 <div class="bg-emerald-100 p-2 rounded-lg text-[10px] font-bold">PRONTO: <span id="count-pronto">0</span></div>
             </div>
 
+            <!-- FORMULÁRIO DE VEÍCULOS -->
             <form id="formVeiculo" class="bg-white p-4 rounded-xl shadow-sm space-y-3">
                 <h3 class="font-bold text-sm text-slate-700 border-b pb-1">Novo Serviço</h3>
                 <input type="text" id="modelo" placeholder="Modelo do Jeep" class="w-full p-2 border rounded text-sm" required>
                 <input type="text" id="placa" placeholder="Placa" class="w-full p-2 border rounded text-sm" required>
                 
+                <!-- AUTOCOMPLETE E BAIXA DE PEÇAS -->
                 <div class="bg-slate-50 p-2 rounded border border-slate-200">
                     <label class="text-xs font-bold text-slate-600 block mb-1">Adicionar Peça (Dá baixa no estoque)</label>
                     <div class="flex gap-2">
@@ -69,8 +76,10 @@
             <div id="lista-veiculos" class="space-y-4 pb-10"></div>
         </div>
 
+        <!-- ================= ABA 2: ESTOQUE ================= -->
         <div id="tela-estoque" class="hidden space-y-4">
             
+            <!-- LEITOR DE NOTAS/CUPONS (Simulação) -->
             <div class="bg-emerald-100 border border-emerald-300 p-4 rounded-xl text-center space-y-2 shadow-sm">
                 <h3 class="font-bold text-sm text-emerald-800">📸 Escanear Nota/Cupom</h3>
                 <p class="text-xs text-emerald-700">Tire uma foto do recibo para preencher as peças automaticamente.</p>
@@ -78,6 +87,7 @@
                 <label for="fotoNota" id="btn-foto" class="inline-block bg-emerald-600 text-white px-4 py-2 rounded-lg text-sm font-bold shadow cursor-pointer w-full">Escanear Foto</label>
             </div>
 
+            <!-- FORMULÁRIO DE PEÇAS -->
             <form id="formPeca" class="bg-white p-4 rounded-xl shadow-sm space-y-3 border border-slate-200">
                 <h3 class="font-bold text-sm text-slate-700 border-b pb-1">Adicionar/Editar Peça</h3>
                 <input type="text" id="nomePeca" placeholder="Nome da Peça (ex: Pastilha de Freio)" class="w-full p-2 border rounded text-sm" required>
@@ -98,12 +108,14 @@
             <div id="lista-estoque" class="space-y-3 pb-10"></div>
         </div>
 
+        <!-- ================= ABA 3: RELATÓRIOS ================= -->
         <div id="tela-relatorios" class="hidden space-y-4">
             
             <div class="bg-slate-800 p-5 rounded-2xl text-white shadow-xl">
                 <h2 class="font-bold text-sm text-slate-400 uppercase tracking-widest mb-4">Resumo Financeiro</h2>
                 
                 <div class="space-y-4">
+                    <!-- TOTAL RECEBIDO -->
                     <div class="bg-emerald-500/20 border border-emerald-500/50 p-4 rounded-xl flex justify-between items-center">
                         <div>
                             <p class="text-xs text-emerald-200">Total Recebido (Pago)</p>
@@ -112,6 +124,7 @@
                         <div class="bg-emerald-500 p-2 rounded-full"><svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg></div>
                     </div>
 
+                    <!-- TOTAL A RECEBER -->
                     <div class="bg-red-500/20 border border-red-500/50 p-4 rounded-xl flex justify-between items-center">
                         <div>
                             <p class="text-xs text-red-200">A Receber (Pendente)</p>
@@ -131,7 +144,7 @@
         // Bancos de Dados
         let veiculos = JSON.parse(localStorage.getItem('dunga_jeep_patio')) || [];
         let estoque = JSON.parse(localStorage.getItem('dunga_jeep_estoque')) || [];
-        const SENHA_CORRETA = "jeep1408";
+        const SENHA_CORRETA = "1234";
 
         let pecasTemporariasServico = []; // Guarda as peças enquanto o form não é salvo
 
@@ -309,9 +322,13 @@
         function enviarLink(id) {
             const v = veiculos.find(v => v.id === id);
             if(!v) return;
-            const urlAtual = window.location.href;
-            const urlBase = urlAtual.substring(0, urlAtual.lastIndexOf('/')) + '/cliente.html';
-            const link = `${urlBase}?m=${encodeURIComponent(v.modelo)}&p=${encodeURIComponent(v.placa)}&s=${v.status}&d=${encodeURIComponent(v.previsao)}&v=${encodeURIComponent(v.valor)}&pg=${v.pagamento}&desc=${encodeURIComponent(v.descricao)}`;
+
+            // LINK DO SEU GITHUB PAGES FIXO:
+            const urlBase = "https://caledcaue123-dev.github.io/dunga-jeep/cliente.html";
+            
+            const desc = v.descricao ? v.descricao : "Serviço Padrão";
+            const link = `${urlBase}?m=${encodeURIComponent(v.modelo)}&p=${encodeURIComponent(v.placa)}&s=${v.status}&d=${encodeURIComponent(v.previsao)}&v=${encodeURIComponent(v.valor)}&pg=${v.pagamento}&desc=${encodeURIComponent(desc)}`;
+            
             window.open(`https://wa.me/?text=${encodeURIComponent('Acompanhe o status do seu Jeep: ' + link)}`, '_blank');
         }
 
@@ -324,7 +341,6 @@
                 btn.innerText = "⏳ Lendo Cupom/Nota...";
                 btn.classList.replace('bg-emerald-600', 'bg-slate-500');
                 
-                // Simula 2 segundos de processamento "OCR"
                 setTimeout(() => {
                     document.getElementById('nomePeca').value = "Filtro de Óleo (Extraído)";
                     document.getElementById('qtdPeca').value = "4";
