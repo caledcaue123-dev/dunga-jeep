@@ -3,119 +3,420 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Status do seu Jeep - Dunga Jeep</title>
+    <title>Painel Dunga Jeep - Admin</title>
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body class="bg-slate-900 text-white font-sans flex items-center justify-center min-h-screen p-4 pb-10">
+<body class="bg-slate-100 font-sans p-4">
 
-    <div class="bg-slate-800 p-6 rounded-2xl shadow-2xl w-full max-w-sm border border-slate-700 text-center space-y-6">
-        <div>
-            <h1 class="text-xl font-bold tracking-wider text-amber-400">DUNGA JEEP</h1>
-            <p class="text-xs text-slate-400 uppercase tracking-widest mt-1">Acompanhamento de Serviço</p>
+    <div id="login-screen" class="fixed inset-0 bg-slate-900 flex items-center justify-center z-50">
+        <div class="bg-white p-8 rounded-2xl shadow-xl w-full max-w-sm text-center">
+            <h2 class="font-bold text-lg mb-4">🔑 Acesso Admin</h2>
+            <input type="password" id="senha" placeholder="Digite a senha" class="w-full p-3 border rounded-lg mb-4">
+            <button onclick="verificarLogin()" class="w-full bg-slate-800 text-white p-3 rounded-lg font-bold">ENTRAR</button>
+        </div>
+    </div>
+
+    <div id="main-content" class="hidden max-w-md mx-auto space-y-4">
+        
+        <div class="flex justify-between items-center bg-white p-3 rounded-xl shadow-sm">
+            <h1 class="text-lg font-bold">🛠️ DUNGA JEEP</h1>
+            <button onclick="sair()" class="text-xs bg-red-100 text-red-600 px-3 py-1 rounded font-bold">Sair</button>
         </div>
 
-        <!-- DADOS DO CARRO E DESCRIÇÃO -->
-        <div class="bg-slate-850 p-4 rounded-xl border border-slate-700 space-y-3 text-left">
-            <div>
-                <h2 id="txt-modelo" class="text-lg font-bold text-white text-center">---</h2>
-                <p id="txt-placa" class="text-sm text-slate-400 font-mono text-center">Placa: ---</p>
+        <div class="flex gap-1 overflow-x-auto pb-1">
+            <button onclick="mudarAba('servicos')" id="aba-servicos" class="flex-1 bg-slate-800 text-white p-2 rounded-lg font-bold text-xs shadow transition-all whitespace-nowrap">Serviços</button>
+            <button onclick="mudarAba('estoque')" id="aba-estoque" class="flex-1 bg-slate-300 text-slate-700 p-2 rounded-lg font-bold text-xs shadow transition-all whitespace-nowrap">📦 Estoque</button>
+            <button onclick="mudarAba('relatorios')" id="aba-relatorios" class="flex-1 bg-slate-300 text-slate-700 p-2 rounded-lg font-bold text-xs shadow transition-all whitespace-nowrap">📊 Faturamento</button>
+        </div>
+        
+        <div id="tela-servicos" class="space-y-4">
+            <div class="grid grid-cols-3 gap-2 text-center">
+                <div class="bg-amber-100 p-2 rounded-lg text-[10px] font-bold">FILA: <span id="count-fila">0</span></div>
+                <div class="bg-blue-100 p-2 rounded-lg text-[10px] font-bold">OFICINA: <span id="count-oficina">0</span></div>
+                <div class="bg-emerald-100 p-2 rounded-lg text-[10px] font-bold">PRONTO: <span id="count-pronto">0</span></div>
             </div>
+
+            <form id="formVeiculo" class="bg-white p-4 rounded-xl shadow-sm space-y-3">
+                <h3 class="font-bold text-sm text-slate-700 border-b pb-1">Novo Serviço</h3>
+                <input type="text" id="modelo" placeholder="Modelo do Jeep" class="w-full p-2 border rounded text-sm" required>
+                <input type="text" id="placa" placeholder="Placa" class="w-full p-2 border rounded text-sm" required>
+                
+                <div class="bg-slate-50 p-2 rounded border border-slate-200">
+                    <label class="text-xs font-bold text-slate-600 block mb-1">Adicionar Peça (Dá baixa no estoque)</label>
+                    <div class="flex gap-2">
+                        <select id="select-peca" class="w-full p-2 border rounded text-sm bg-white">
+                            <option value="">Selecione uma peça...</option>
+                        </select>
+                        <button type="button" onclick="adicionarPecaAoServico()" class="bg-slate-700 text-white px-3 rounded font-bold">+</button>
+                    </div>
+                    <ul id="lista-pecas-servico" class="text-xs mt-2 space-y-1 text-slate-600"></ul>
+                    <input type="hidden" id="descricao" value="">
+                </div>
+                
+                <input type="date" id="previsao" class="w-full p-2 border rounded text-sm" required>
+                
+                <div class="grid grid-cols-2 gap-2">
+                    <input type="number" id="valor" placeholder="Mão de Obra + Peças (R$)" class="w-full p-2 border rounded text-sm" step="0.01" required>
+                    <select id="pagamento" class="w-full p-2 border rounded text-sm">
+                        <option value="pendente">🔴 Pendente</option>
+                        <option value="pago">🟢 Pago</option>
+                    </select>
+                </div>
+                
+                <button type="submit" class="w-full bg-slate-800 text-white p-2 rounded font-bold uppercase text-sm">Cadastrar Serviço</button>
+            </form>
+
+            <div id="lista-veiculos" class="space-y-4 pb-10"></div>
+        </div>
+
+        <div id="tela-estoque" class="hidden space-y-4">
             
-            <div class="border-t border-slate-700 pt-3">
-                <p class="text-[10px] text-slate-400 uppercase font-bold tracking-wider mb-1">Serviços Realizados:</p>
-                <p id="txt-descricao" class="text-sm text-slate-300 italic">Nenhuma descrição informada.</p>
+            <div class="bg-emerald-100 border border-emerald-300 p-4 rounded-xl text-center space-y-2 shadow-sm">
+                <h3 class="font-bold text-sm text-emerald-800">📸 Escanear Nota/Cupom</h3>
+                <p class="text-xs text-emerald-700">Tire uma foto do recibo para preencher as peças automaticamente.</p>
+                <input type="file" id="fotoNota" accept="image/*" class="hidden" onchange="simularLeituraNota()">
+                <label for="fotoNota" id="btn-foto" class="inline-block bg-emerald-600 text-white px-4 py-2 rounded-lg text-sm font-bold shadow cursor-pointer w-full">Escanear Foto</label>
             </div>
+
+            <form id="formPeca" class="bg-white p-4 rounded-xl shadow-sm space-y-3 border border-slate-200">
+                <h3 class="font-bold text-sm text-slate-700 border-b pb-1">Adicionar/Editar Peça</h3>
+                <input type="text" id="nomePeca" placeholder="Nome da Peça (ex: Pastilha de Freio)" class="w-full p-2 border rounded text-sm" required>
+                
+                <div class="grid grid-cols-2 gap-2">
+                    <input type="number" id="qtdPeca" placeholder="Quantidade" class="w-full p-2 border rounded text-sm" required min="1">
+                    <input type="number" id="valorPeca" placeholder="Valor Unitário R$" class="w-full p-2 border rounded text-sm" step="0.01" required>
+                </div>
+                
+                <button type="submit" class="w-full bg-slate-700 text-white p-2 rounded font-bold uppercase text-sm">Salvar no Estoque</button>
+            </form>
+
+            <div class="bg-slate-800 text-white p-3 rounded-xl shadow-sm flex justify-between items-center">
+                <span class="text-sm font-bold">Valor em Estoque:</span>
+                <span id="valor-total-estoque" class="text-lg font-bold text-amber-400">R$ 0,00</span>
+            </div>
+
+            <div id="lista-estoque" class="space-y-3 pb-10"></div>
+        </div>
+
+        <div id="tela-relatorios" class="hidden space-y-4">
             
-            <p id="txt-previsao" class="text-xs text-slate-400 mt-2 text-center pt-2">Previsão de entrega: ---</p>
-        </div>
+            <div class="bg-slate-800 p-5 rounded-2xl text-white shadow-xl">
+                <h2 class="font-bold text-sm text-slate-400 uppercase tracking-widest mb-4">Resumo Financeiro</h2>
+                
+                <div class="space-y-4">
+                    <div class="bg-emerald-500/20 border border-emerald-500/50 p-4 rounded-xl flex justify-between items-center">
+                        <div>
+                            <p class="text-xs text-emerald-200">Total Recebido (Pago)</p>
+                            <p id="total-pago" class="text-2xl font-bold text-emerald-400">R$ 0,00</p>
+                        </div>
+                        <div class="bg-emerald-500 p-2 rounded-full"><svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg></div>
+                    </div>
 
-        <!-- STATUS ATUAL -->
-        <div class="space-y-2">
-            <p class="text-[10px] text-slate-400 uppercase font-bold tracking-wider text-left">Status Atual:</p>
-            <div id="status-box" class="p-4 rounded-xl text-lg font-bold uppercase tracking-wide shadow-inner">
-                Carregando...
-            </div>
-        </div>
-
-        <!-- FINANCEIRO DO CLIENTE -->
-        <div class="bg-slate-850 p-4 rounded-xl border border-slate-700 text-left space-y-2">
-            <p class="text-[10px] text-slate-400 uppercase font-bold tracking-wider">Resumo Financeiro:</p>
-            <div class="flex justify-between items-center">
-                <span class="text-sm text-slate-300">Valor Total:</span>
-                <span id="txt-valor" class="text-base font-bold text-white">R$ 0,00</span>
-            </div>
-            <div class="flex justify-between items-center pb-2">
-                <span class="text-sm text-slate-300">Situação:</span>
-                <span id="txt-pagamento" class="text-xs font-bold px-2 py-1 rounded">---</span>
+                    <div class="bg-red-500/20 border border-red-500/50 p-4 rounded-xl flex justify-between items-center">
+                        <div>
+                            <p class="text-xs text-red-200">A Receber (Pendente)</p>
+                            <p id="total-pendente" class="text-2xl font-bold text-red-400">R$ 0,00</p>
+                        </div>
+                        <div class="bg-red-500 p-2 rounded-full"><svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg></div>
+                    </div>
+                </div>
             </div>
 
-            <!-- BOTÃO PIX (Aparece apenas se estiver pendente) -->
-            <div id="area-pagamento" class="hidden border-t border-slate-700 pt-4 mt-2">
-                <button onclick="solicitarPix()" class="w-full bg-emerald-500 hover:bg-emerald-600 text-white font-bold py-3 rounded-lg flex items-center justify-center gap-2 shadow-lg transition-all">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                    Pagar com PIX
-                </button>
-            </div>
+            <p class="text-xs text-slate-500 text-center px-4">Estes valores são calculados com base em todos os serviços cadastrados no sistema.</p>
         </div>
 
     </div>
 
     <script>
-        // Captura os dados da URL
-        const params = new URLSearchParams(window.location.search);
-        const modelo = params.get('m') || "Não informado";
-        const placa = params.get('p') || "---";
-        const status = params.get('s') || "fila";
-        const previsao = params.get('d') || "---";
-        const valor = params.get('v') || "0.00";
-        const pagamento = params.get('pg') || "pendente";
-        const descricao = params.get('desc'); // Captura a descrição
+        // Bancos de Dados
+        let veiculos = JSON.parse(localStorage.getItem('dunga_jeep_patio')) || [];
+        let estoque = JSON.parse(localStorage.getItem('dunga_jeep_estoque')) || [];
+        const SENHA_CORRETA = "1234";
 
-        // Formatação
-        const valorFormatado = parseFloat(valor).toLocaleString('pt-BR', { minimumFractionDigits: 2 });
-        
-        // Preenchimento
-        document.getElementById('txt-modelo').innerText = modelo;
-        document.getElementById('txt-placa').innerText = `Placa: ${placa}`;
-        document.getElementById('txt-previsao').innerText = `Previsão de entrega: ${previsao}`;
-        document.getElementById('txt-valor').innerText = `R$ ${valorFormatado}`;
-        
-        if (descricao) {
-            document.getElementById('txt-descricao').innerText = descricao;
+        let pecasTemporariasServico = []; // Guarda as peças enquanto o form não é salvo
+
+        window.onload = function() {
+            if(localStorage.getItem('dunga_jeep_logado') === 'true') {
+                document.getElementById('login-screen').classList.add('hidden');
+                document.getElementById('main-content').classList.remove('hidden');
+            }
+            atualizarTudo();
         }
 
-        // Configura o Status Visual
-        const statusBox = document.getElementById('status-box');
-        if (status === 'fila') {
-            statusBox.innerText = "⏳ Na Fila de Espera";
-            statusBox.className = "p-4 rounded-xl text-lg font-bold uppercase tracking-wide bg-amber-500/20 text-amber-400 border border-amber-500/30";
-        } else if (status === 'oficina') {
-            statusBox.innerText = "🔧 Em Manutenção";
-            statusBox.className = "p-4 rounded-xl text-lg font-bold uppercase tracking-wide bg-blue-500/20 text-blue-400 border border-blue-500/30";
-        } else if (status === 'pronto') {
-            statusBox.innerText = "✅ Pronto para Retirar";
-            statusBox.className = "p-4 rounded-xl text-lg font-bold uppercase tracking-wide bg-emerald-500/20 text-emerald-400 border border-emerald-500/30";
+        function verificarLogin() {
+            if(document.getElementById('senha').value === SENHA_CORRETA) {
+                localStorage.setItem('dunga_jeep_logado', 'true');
+                document.getElementById('login-screen').classList.add('hidden');
+                document.getElementById('main-content').classList.remove('hidden');
+            } else { alert("Senha incorreta!"); }
         }
 
-        // Configura o Pagamento Visual e Botão PIX
-        const pagBadge = document.getElementById('txt-pagamento');
-        if (pagamento === 'pago') {
-            pagBadge.innerText = "PAGO";
-            pagBadge.className = "text-xs font-bold px-2 py-1 rounded bg-emerald-500/20 text-emerald-400 border border-emerald-500/30";
-        } else {
-            pagBadge.innerText = "AGUARDANDO PAGAMENTO";
-            pagBadge.className = "text-xs font-bold px-2 py-1 rounded bg-red-500/20 text-red-400 border border-red-500/30";
+        function sair() {
+            localStorage.removeItem('dunga_jeep_logado');
+            window.location.reload();
+        }
+
+        function mudarAba(aba) {
+            document.getElementById('tela-servicos').classList.add('hidden');
+            document.getElementById('tela-estoque').classList.add('hidden');
+            document.getElementById('tela-relatorios').classList.add('hidden');
             
-            // Mostra o botão do PIX se estiver pendente
-            document.getElementById('area-pagamento').classList.remove('hidden');
+            document.getElementById('aba-servicos').className = "flex-1 bg-slate-300 text-slate-700 p-2 rounded-lg font-bold text-xs shadow transition-all whitespace-nowrap";
+            document.getElementById('aba-estoque').className = "flex-1 bg-slate-300 text-slate-700 p-2 rounded-lg font-bold text-xs shadow transition-all whitespace-nowrap";
+            document.getElementById('aba-relatorios').className = "flex-1 bg-slate-300 text-slate-700 p-2 rounded-lg font-bold text-xs shadow transition-all whitespace-nowrap";
+
+            if (aba === 'servicos') {
+                document.getElementById('tela-servicos').classList.remove('hidden');
+                document.getElementById('aba-servicos').classList.replace('bg-slate-300', 'bg-slate-800');
+                document.getElementById('aba-servicos').classList.replace('text-slate-700', 'text-white');
+            } else if (aba === 'estoque') {
+                document.getElementById('tela-estoque').classList.remove('hidden');
+                document.getElementById('aba-estoque').classList.replace('bg-slate-300', 'bg-slate-800');
+                document.getElementById('aba-estoque').classList.replace('text-slate-700', 'text-white');
+            } else {
+                document.getElementById('tela-relatorios').classList.remove('hidden');
+                document.getElementById('aba-relatorios').classList.replace('bg-slate-300', 'bg-slate-800');
+                document.getElementById('aba-relatorios').classList.replace('text-slate-700', 'text-white');
+            }
         }
 
-        // Função do Botão PIX (Por enquanto envia WhatsApp para você)
-        function solicitarPix() {
-            const numeroDono = "5569992303279"; // COLOQUE SEU NÚMERO COM DDD AQUI (Ex: 5569992303580)
-            const mensagem = `Olá! Vi o link do meu Veículo: (${modelo}) e gostaria de realizar o pagamento do valor de R$ ${valorFormatado} via PIX/Cartão. Pode me enviar os dados?`;
-            window.open(`https://wa.me/${numeroDono}?text=${encodeURIComponent(mensagem)}`, '_blank');
+        function atualizarTudo() {
+            renderizarVeiculos();
+            renderizarEstoque();
+            atualizarSelectPecas();
+            calcularRelatorios();
         }
+
+        // ================= FUNÇÕES DO SERVIÇO E BAIXA =================
+        function atualizarSelectPecas() {
+            const select = document.getElementById('select-peca');
+            select.innerHTML = '<option value="">Selecione uma peça...</option>';
+            estoque.forEach(p => {
+                if (p.qtd > 0) {
+                    select.innerHTML += `<option value="${p.id}">${p.nome} - R$ ${p.valor} (${p.qtd} em estoque)</option>`;
+                }
+            });
+        }
+
+        function adicionarPecaAoServico() {
+            const select = document.getElementById('select-peca');
+            const id = select.value;
+            if(!id) return;
+
+            const pecaIndex = estoque.findIndex(p => p.id === id);
+            if (pecaIndex === -1 || estoque[pecaIndex].qtd <= 0) {
+                alert("Peça indisponível no estoque!");
+                return;
+            }
+
+            // Dá baixa no estoque
+            estoque[pecaIndex].qtd -= 1;
+            localStorage.setItem('dunga_jeep_estoque', JSON.stringify(estoque));
+            
+            // Adiciona na lista temporária visual
+            const peca = estoque[pecaIndex];
+            pecasTemporariasServico.push(peca.nome);
+            
+            // Soma o valor automaticamente
+            const inputValor = document.getElementById('valor');
+            let valorAtual = parseFloat(inputValor.value) || 0;
+            inputValor.value = (valorAtual + peca.valor).toFixed(2);
+
+            // Atualiza a visualização
+            document.getElementById('lista-pecas-servico').innerHTML += `<li>✔️ ${peca.nome} (R$ ${peca.valor})</li>`;
+            document.getElementById('descricao').value = pecasTemporariasServico.join(', ');
+
+            atualizarTudo();
+        }
+
+        document.getElementById('formVeiculo').addEventListener('submit', function(e) {
+            e.preventDefault();
+            veiculos.push({
+                id: Date.now().toString(),
+                modelo: document.getElementById('modelo').value,
+                placa: document.getElementById('placa').value,
+                descricao: document.getElementById('descricao').value || "Serviço Padrão",
+                previsao: document.getElementById('previsao').value,
+                valor: document.getElementById('valor').value,
+                pagamento: document.getElementById('pagamento').value,
+                status: 'fila'
+            });
+            localStorage.setItem('dunga_jeep_patio', JSON.stringify(veiculos));
+            this.reset();
+            document.getElementById('lista-pecas-servico').innerHTML = "";
+            pecasTemporariasServico = [];
+            document.getElementById('descricao').value = "";
+            atualizarTudo();
+        });
+
+        function renderizarVeiculos() {
+            document.getElementById('lista-veiculos').innerHTML = "";
+            let stats = { fila: 0, oficina: 0, pronto: 0 };
+
+            veiculos.forEach(v => {
+                stats[v.status]++;
+                const corPagamento = v.pagamento === 'pago' ? 'text-emerald-600' : 'text-red-500';
+                const textoPagamento = v.pagamento === 'pago' ? '🟢 Pago' : '🔴 Pendente';
+                const valorFormatado = parseFloat(v.valor).toLocaleString('pt-BR', { minimumFractionDigits: 2 });
+                const descCurta = v.descricao ? v.descricao.substring(0, 40) + '...' : 'Sem descrição';
+
+                document.getElementById('lista-veiculos').innerHTML += `
+                    <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm space-y-2">
+                        <div class="flex justify-between items-center">
+                            <strong>${v.modelo}</strong>
+                            <button onclick="removerVeiculo('${v.id}')" class="text-red-400 font-bold">✕</button>
+                        </div>
+                        <p class="text-[11px] text-slate-500">Placa: ${v.placa} | Entrega: ${v.previsao}</p>
+                        <p class="text-[11px] text-slate-600 font-medium">Peças/Serviço: ${descCurta}</p>
+                        <p class="text-xs font-bold ${corPagamento}">Valor: R$ ${valorFormatado} (${textoPagamento})</p>
+                        
+                        <div class="mt-3 flex flex-wrap gap-1">
+                            ${v.status !== 'fila' ? `<button onclick="mudarStatus('${v.id}','fila')" class="text-[10px] bg-amber-500 text-white px-2 py-1 rounded shadow">Fila</button>` : ''}
+                            ${v.status !== 'oficina' ? `<button onclick="mudarStatus('${v.id}','oficina')" class="text-[10px] bg-blue-500 text-white px-2 py-1 rounded shadow">Oficina</button>` : ''}
+                            ${v.status !== 'pronto' ? `<button onclick="mudarStatus('${v.id}','pronto')" class="text-[10px] bg-emerald-500 text-white px-2 py-1 rounded shadow">Pronto</button>` : ''}
+                            <button onclick="alternarPagamento('${v.id}')" class="text-[10px] bg-purple-600 text-white px-2 py-1 rounded shadow">Mudar Pgto</button>
+                            <button onclick="enviarLink('${v.id}')" class="text-[10px] bg-slate-800 text-white px-2 py-1 rounded shadow w-full mt-1">📲 Enviar Link WhatsApp</button>
+                        </div>
+                    </div>
+                `;
+            });
+
+            document.getElementById('count-fila').innerText = stats.fila;
+            document.getElementById('count-oficina').innerText = stats.oficina;
+            document.getElementById('count-pronto').innerText = stats.pronto;
+        }
+
+        function mudarStatus(id, status) {
+            veiculos = veiculos.map(v => v.id === id ? {...v, status} : v);
+            localStorage.setItem('dunga_jeep_patio', JSON.stringify(veiculos));
+            atualizarTudo();
+        }
+
+        function alternarPagamento(id) {
+            veiculos = veiculos.map(v => v.id === id ? {...v, pagamento: v.pagamento === 'pago' ? 'pendente' : 'pago'} : v);
+            localStorage.setItem('dunga_jeep_patio', JSON.stringify(veiculos));
+            atualizarTudo();
+        }
+
+        function removerVeiculo(id) {
+            if(confirm('Tem certeza que deseja excluir este veículo?')) {
+                veiculos = veiculos.filter(v => v.id !== id);
+                localStorage.setItem('dunga_jeep_patio', JSON.stringify(veiculos));
+                atualizarTudo();
+            }
+        }
+
+        function enviarLink(id) {
+            const v = veiculos.find(v => v.id === id);
+            if(!v) return;
+            const urlAtual = window.location.href;
+            const urlBase = urlAtual.substring(0, urlAtual.lastIndexOf('/')) + '/cliente.html';
+            const link = `${urlBase}?m=${encodeURIComponent(v.modelo)}&p=${encodeURIComponent(v.placa)}&s=${v.status}&d=${encodeURIComponent(v.previsao)}&v=${encodeURIComponent(v.valor)}&pg=${v.pagamento}&desc=${encodeURIComponent(v.descricao)}`;
+            window.open(`https://wa.me/?text=${encodeURIComponent('Acompanhe o status do seu Jeep: ' + link)}`, '_blank');
+        }
+
+        // ================= ESTOQUE E LEITURA DE NOTA =================
+        function simularLeituraNota() {
+            const input = document.getElementById('fotoNota');
+            const btn = document.getElementById('btn-foto');
+            
+            if(input.files && input.files[0]) {
+                btn.innerText = "⏳ Lendo Cupom/Nota...";
+                btn.classList.replace('bg-emerald-600', 'bg-slate-500');
+                
+                // Simula 2 segundos de processamento "OCR"
+                setTimeout(() => {
+                    document.getElementById('nomePeca').value = "Filtro de Óleo (Extraído)";
+                    document.getElementById('qtdPeca').value = "4";
+                    document.getElementById('valorPeca').value = "45.00";
+                    
+                    btn.innerText = "Escanear Foto";
+                    btn.classList.replace('bg-slate-500', 'bg-emerald-600');
+                    alert("Atenção: Revise os dados extraídos da nota antes de salvar!");
+                }, 2000);
+            }
+        }
+
+        document.getElementById('formPeca').addEventListener('submit', function(e) {
+            e.preventDefault();
+            estoque.push({
+                id: Date.now().toString(),
+                nome: document.getElementById('nomePeca').value,
+                qtd: parseInt(document.getElementById('qtdPeca').value),
+                valor: parseFloat(document.getElementById('valorPeca').value)
+            });
+            localStorage.setItem('dunga_jeep_estoque', JSON.stringify(estoque));
+            this.reset();
+            atualizarTudo();
+        });
+
+        function alterarQtd(id, valor) {
+            estoque = estoque.map(p => {
+                if (p.id === id) {
+                    let novaQtd = p.qtd + valor;
+                    if (novaQtd < 0) novaQtd = 0;
+                    return {...p, qtd: novaQtd};
+                }
+                return p;
+            });
+            localStorage.setItem('dunga_jeep_estoque', JSON.stringify(estoque));
+            atualizarTudo();
+        }
+
+        function removerPeca(id) {
+            if(confirm('Tem certeza?')) {
+                estoque = estoque.filter(p => p.id !== id);
+                localStorage.setItem('dunga_jeep_estoque', JSON.stringify(estoque));
+                atualizarTudo();
+            }
+        }
+
+        function renderizarEstoque() {
+            document.getElementById('lista-estoque').innerHTML = "";
+            let valorTotalGeral = 0;
+
+            estoque.forEach(p => {
+                const valorUn = parseFloat(p.valor).toLocaleString('pt-BR', { minimumFractionDigits: 2 });
+                valorTotalGeral += (p.qtd * p.valor);
+                const corQtd = p.qtd <= 2 ? 'text-red-500' : 'text-emerald-600';
+
+                document.getElementById('lista-estoque').innerHTML += `
+                    <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
+                        <div class="flex justify-between items-start mb-2">
+                            <div><strong class="text-sm">${p.nome}</strong><br><span class="text-[11px] text-slate-500">Unidade: R$ ${valorUn}</span></div>
+                            <button onclick="removerPeca('${p.id}')" class="text-red-400 font-bold">✕</button>
+                        </div>
+                        <div class="flex justify-between items-center bg-slate-50 p-2 rounded-lg border">
+                            <span class="text-xs font-bold ${corQtd}">Qtd: ${p.qtd}</span>
+                            <div class="flex gap-2">
+                                <button type="button" onclick="alterarQtd('${p.id}', -1)" class="bg-slate-300 w-6 h-6 rounded font-bold">-</button>
+                                <button type="button" onclick="alterarQtd('${p.id}', 1)" class="bg-slate-700 text-white w-6 h-6 rounded font-bold">+</button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+            document.getElementById('valor-total-estoque').innerText = `R$ ${valorTotalGeral.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`;
+        }
+
+        // ================= RELATÓRIOS FINANCEIROS =================
+        function calcularRelatorios() {
+            let totalPago = 0;
+            let totalPendente = 0;
+
+            veiculos.forEach(v => {
+                const valor = parseFloat(v.valor) || 0;
+                if(v.pagamento === 'pago') {
+                    totalPago += valor;
+                } else {
+                    totalPendente += valor;
+                }
+            });
+
+            document.getElementById('total-pago').innerText = `R$ ${totalPago.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`;
+            document.getElementById('total-pendente').innerText = `R$ ${totalPendente.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`;
+        }
+
     </script>
 </body>
 </html>
