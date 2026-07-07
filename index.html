@@ -93,7 +93,7 @@
         // Bancos de Dados
         let veiculos = JSON.parse(localStorage.getItem('dunga_jeep_patio')) || [];
         let estoque = JSON.parse(localStorage.getItem('dunga_jeep_estoque')) || [];
-        const SENHA_CORRETA = "1234";
+        const SENHA_CORRETA = "jeep1408";
 
         // ================= LOGIN =================
         window.onload = function() {
@@ -221,7 +221,7 @@
             const urlBase = urlAtual.substring(0, urlAtual.lastIndexOf('/')) + '/cliente.html';
             const desc = v.descricao ? v.descricao : '';
             const link = `${urlBase}?m=${encodeURIComponent(v.modelo)}&p=${encodeURIComponent(v.placa)}&s=${v.status}&d=${encodeURIComponent(v.previsao)}&v=${encodeURIComponent(v.valor)}&pg=${v.pagamento}&desc=${encodeURIComponent(desc)}`;
-            window.open(`https://wa.me/?text=${encodeURIComponent('Acompanhe o status e orçamento do seu Jeep: ' + link)}`, '_blank');
+            window.open(`https://wa.me/?text=${encodeURIComponent('Acompanhe o status e orçamento do seu Veículo: ' + link)}`, '_blank');
         }
 
         // ================= LÓGICA DE ESTOQUE =================
