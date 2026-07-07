@@ -305,16 +305,18 @@
                 atualizarTudo();
             }
         }
-
-        function enviarLink(id) {
+// Função enviar melhorada: busca os dados pelo ID para evitar erros com textos longos
+        function enviar(id) {
             const v = veiculos.find(v => v.id === id);
             if(!v) return;
+            
             const urlAtual = window.location.href;
             const urlBase = urlAtual.substring(0, urlAtual.lastIndexOf('/')) + '/cliente.html';
-            const link = `${urlBase}?m=${encodeURIComponent(v.modelo)}&p=${encodeURIComponent(v.placa)}&s=${v.status}&d=${encodeURIComponent(v.previsao)}&v=${encodeURIComponent(v.valor)}&pg=${v.pagamento}&desc=${encodeURIComponent(v.descricao)}`;
-            window.open(`https://wa.me/?text=${encodeURIComponent('Acompanhe o status do seu Veículo: ' + link)}`, '_blank');
+            const desc = v.descricao ? v.descricao : '';
+            
+            const link = `${urlBase}?m=${encodeURIComponent(v.modelo)}&p=${encodeURIComponent(v.placa)}&s=${v.status}&d=${encodeURIComponent(v.previsao)}&v=${encodeURIComponent(v.valor)}&pg=${v.pagamento}&desc=${encodeURIComponent(desc)}`;
+            window.open(`https://wa.me/?text=${encodeURIComponent('Acompanhe o status e orçamento do seu Veículos: ' + link)}`, '_blank');
         }
-
         // ================= ESTOQUE E LEITURA DE NOTA =================
         function simularLeituraNota() {
             const input = document.getElementById('fotoNota');
