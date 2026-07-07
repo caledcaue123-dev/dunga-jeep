@@ -19,50 +19,90 @@
 
     <!-- PAINEL PRINCIPAL -->
     <div id="main-content" class="hidden max-w-md mx-auto space-y-4">
-        <div class="flex justify-between items-center">
-            <h1 class="text-xl font-bold">🛠️ DUNGA JEEP</h1>
-            <button onclick="sair()" class="text-xs bg-red-100 text-red-600 px-2 py-1 rounded">Sair</button>
+        
+        <!-- CABEÇALHO -->
+        <div class="flex justify-between items-center bg-white p-3 rounded-xl shadow-sm">
+            <h1 class="text-lg font-bold">🛠️ DUNGA JEEP</h1>
+            <button onclick="sair()" class="text-xs bg-red-100 text-red-600 px-3 py-1 rounded font-bold">Sair</button>
+        </div>
+
+        <!-- ABAS DE NAVEGAÇÃO -->
+        <div class="flex gap-2">
+            <button onclick="mudarAba('servicos')" id="aba-servicos" class="flex-1 bg-slate-800 text-white p-2 rounded-lg font-bold text-sm shadow transition-all">Serviços</button>
+            <button onclick="mudarAba('estoque')" id="aba-estoque" class="flex-1 bg-slate-300 text-slate-700 p-2 rounded-lg font-bold text-sm shadow transition-all">📦 Estoque</button>
         </div>
         
-        <!-- DASHBOARD DE ESTATÍSTICAS -->
-        <div class="grid grid-cols-3 gap-2 text-center">
-            <div class="bg-amber-100 p-2 rounded-lg text-[10px] font-bold">FILA: <span id="count-fila">0</span></div>
-            <div class="bg-blue-100 p-2 rounded-lg text-[10px] font-bold">OFICINA: <span id="count-oficina">0</span></div>
-            <div class="bg-emerald-100 p-2 rounded-lg text-[10px] font-bold">PRONTO: <span id="count-pronto">0</span></div>
+        <!-- ================= ABA 1: SERVIÇOS ================= -->
+        <div id="tela-servicos" class="space-y-4">
+            <!-- DASHBOARD DE ESTATÍSTICAS -->
+            <div class="grid grid-cols-3 gap-2 text-center">
+                <div class="bg-amber-100 p-2 rounded-lg text-[10px] font-bold">FILA: <span id="count-fila">0</span></div>
+                <div class="bg-blue-100 p-2 rounded-lg text-[10px] font-bold">OFICINA: <span id="count-oficina">0</span></div>
+                <div class="bg-emerald-100 p-2 rounded-lg text-[10px] font-bold">PRONTO: <span id="count-pronto">0</span></div>
+            </div>
+
+            <!-- FORMULÁRIO DE VEÍCULOS -->
+            <form id="formVeiculo" class="bg-white p-4 rounded-xl shadow-sm space-y-3">
+                <h3 class="font-bold text-sm text-slate-700 border-b pb-1">Novo Serviço</h3>
+                <input type="text" id="modelo" placeholder="Modelo do Jeep" class="w-full p-2 border rounded text-sm" required>
+                <input type="text" id="placa" placeholder="Placa" class="w-full p-2 border rounded text-sm" required>
+                <textarea id="descricao" placeholder="Serviços realizados (ex: Troca de óleo...)" class="w-full p-2 border rounded text-sm" rows="2"></textarea>
+                <input type="date" id="previsao" class="w-full p-2 border rounded text-sm" required>
+                
+                <div class="grid grid-cols-2 gap-2">
+                    <input type="number" id="valor" placeholder="Valor R$" class="w-full p-2 border rounded text-sm" step="0.01" required>
+                    <select id="pagamento" class="w-full p-2 border rounded text-sm">
+                        <option value="pendente">🔴 Pendente</option>
+                        <option value="pago">🟢 Pago</option>
+                    </select>
+                </div>
+                
+                <button type="submit" class="w-full bg-slate-800 text-white p-2 rounded font-bold uppercase text-sm">Cadastrar Serviço</button>
+            </form>
+
+            <div id="lista-veiculos" class="space-y-4 pb-10"></div>
         </div>
 
-        <!-- FORMULÁRIO COM DESCRIÇÃO -->
-        <form id="formVeiculo" class="bg-white p-4 rounded-xl shadow-sm space-y-3">
-            <input type="text" id="modelo" placeholder="Modelo do Jeep" class="w-full p-2 border rounded" required>
-            <input type="text" id="placa" placeholder="Placa" class="w-full p-2 border rounded" required>
-            <textarea id="descricao" placeholder="Serviços realizados (ex: Troca de óleo...)" class="w-full p-2 border rounded" rows="2"></textarea>
-            <input type="date" id="previsao" class="w-full p-2 border rounded" required>
-            
-            <div class="grid grid-cols-2 gap-2">
-                <input type="number" id="valor" placeholder="Valor R$" class="w-full p-2 border rounded" step="0.01" required>
-                <select id="pagamento" class="w-full p-2 border rounded">
-                    <option value="pendente">🔴 Pendente</option>
-                    <option value="pago">🟢 Pago</option>
-                </select>
-            </div>
-            
-            <button type="submit" class="w-full bg-slate-800 text-white p-2 rounded font-bold uppercase text-sm">Cadastrar</button>
-        </form>
+        <!-- ================= ABA 2: ESTOQUE ================= -->
+        <div id="tela-estoque" class="hidden space-y-4">
+            <!-- FORMULÁRIO DE PEÇAS -->
+            <form id="formPeca" class="bg-white p-4 rounded-xl shadow-sm space-y-3">
+                <h3 class="font-bold text-sm text-slate-700 border-b pb-1">Adicionar Peça</h3>
+                <input type="text" id="nomePeca" placeholder="Nome da Peça (ex: Pastilha de Freio)" class="w-full p-2 border rounded text-sm" required>
+                
+                <div class="grid grid-cols-2 gap-2">
+                    <input type="number" id="qtdPeca" placeholder="Quantidade" class="w-full p-2 border rounded text-sm" required min="1">
+                    <input type="number" id="valorPeca" placeholder="Valor Unitário R$" class="w-full p-2 border rounded text-sm" step="0.01" required>
+                </div>
+                
+                <button type="submit" class="w-full bg-slate-700 text-white p-2 rounded font-bold uppercase text-sm">Salvar no Estoque</button>
+            </form>
 
-        <div id="lista-veiculos" class="space-y-4 pb-10"></div>
+            <!-- VALOR TOTAL DO ESTOQUE -->
+            <div class="bg-slate-800 text-white p-3 rounded-xl shadow-sm flex justify-between items-center">
+                <span class="text-sm font-bold">Valor em Estoque:</span>
+                <span id="valor-total-estoque" class="text-lg font-bold text-amber-400">R$ 0,00</span>
+            </div>
+
+            <div id="lista-estoque" class="space-y-3 pb-10"></div>
+        </div>
+
     </div>
 
     <script>
+        // Bancos de Dados
         let veiculos = JSON.parse(localStorage.getItem('dunga_jeep_patio')) || [];
-        const SENHA_CORRETA = "senha1408";
+        let estoque = JSON.parse(localStorage.getItem('dunga_jeep_estoque')) || [];
+        const SENHA_CORRETA = "1234";
 
-        // Verifica se o dono já logou antes
+        // ================= LOGIN =================
         window.onload = function() {
             if(localStorage.getItem('dunga_jeep_logado') === 'true') {
                 document.getElementById('login-screen').classList.add('hidden');
                 document.getElementById('main-content').classList.remove('hidden');
             }
-            renderizar();
+            renderizarVeiculos();
+            renderizarEstoque();
         }
 
         function verificarLogin() {
@@ -78,6 +118,27 @@
             window.location.reload();
         }
 
+        // ================= NAVEGAÇÃO DE ABAS =================
+        function mudarAba(aba) {
+            const btnServicos = document.getElementById('aba-servicos');
+            const btnEstoque = document.getElementById('aba-estoque');
+            const telaServicos = document.getElementById('tela-servicos');
+            const telaEstoque = document.getElementById('tela-estoque');
+
+            if (aba === 'servicos') {
+                telaServicos.classList.remove('hidden');
+                telaEstoque.classList.add('hidden');
+                btnServicos.className = "flex-1 bg-slate-800 text-white p-2 rounded-lg font-bold text-sm shadow transition-all";
+                btnEstoque.className = "flex-1 bg-slate-300 text-slate-700 p-2 rounded-lg font-bold text-sm shadow transition-all";
+            } else {
+                telaServicos.classList.add('hidden');
+                telaEstoque.classList.remove('hidden');
+                btnEstoque.className = "flex-1 bg-slate-800 text-white p-2 rounded-lg font-bold text-sm shadow transition-all";
+                btnServicos.className = "flex-1 bg-slate-300 text-slate-700 p-2 rounded-lg font-bold text-sm shadow transition-all";
+            }
+        }
+
+        // ================= LÓGICA DE SERVIÇOS (VEÍCULOS) =================
         document.getElementById('formVeiculo').addEventListener('submit', function(e) {
             e.preventDefault();
             veiculos.push({
@@ -92,10 +153,10 @@
             });
             localStorage.setItem('dunga_jeep_patio', JSON.stringify(veiculos));
             this.reset();
-            renderizar();
+            renderizarVeiculos();
         });
 
-        function renderizar() {
+        function renderizarVeiculos() {
             document.getElementById('lista-veiculos').innerHTML = "";
             let stats = { fila: 0, oficina: 0, pronto: 0 };
 
@@ -110,19 +171,19 @@
                     <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm space-y-2">
                         <div class="flex justify-between items-center">
                             <strong>${v.modelo}</strong>
-                            <button onclick="remover('${v.id}')" class="text-red-400 font-bold">✕</button>
+                            <button onclick="removerVeiculo('${v.id}')" class="text-red-400 font-bold">✕</button>
                         </div>
                         <p class="text-[11px] text-slate-500">Placa: ${v.placa} | Entrega: ${v.previsao}</p>
                         <p class="text-[11px] text-slate-600">Serviço: ${descCurta}</p>
                         <p class="text-xs font-bold ${corPagamento}">Valor: R$ ${valorFormatado} (${textoPagamento})</p>
                         
                         <div class="mt-3 flex flex-wrap gap-1">
-                            ${v.status !== 'fila' ? `<button onclick="mudar('${v.id}','fila')" class="text-[10px] bg-amber-500 text-white px-2 py-1 rounded shadow">Fila</button>` : ''}
-                            ${v.status !== 'oficina' ? `<button onclick="mudar('${v.id}','oficina')" class="text-[10px] bg-blue-500 text-white px-2 py-1 rounded shadow">Oficina</button>` : ''}
-                            ${v.status !== 'pronto' ? `<button onclick="mudar('${v.id}','pronto')" class="text-[10px] bg-emerald-500 text-white px-2 py-1 rounded shadow">Pronto</button>` : ''}
+                            ${v.status !== 'fila' ? `<button onclick="mudarStatus('${v.id}','fila')" class="text-[10px] bg-amber-500 text-white px-2 py-1 rounded shadow">Fila</button>` : ''}
+                            ${v.status !== 'oficina' ? `<button onclick="mudarStatus('${v.id}','oficina')" class="text-[10px] bg-blue-500 text-white px-2 py-1 rounded shadow">Oficina</button>` : ''}
+                            ${v.status !== 'pronto' ? `<button onclick="mudarStatus('${v.id}','pronto')" class="text-[10px] bg-emerald-500 text-white px-2 py-1 rounded shadow">Pronto</button>` : ''}
                             
                             <button onclick="alternarPagamento('${v.id}')" class="text-[10px] bg-purple-600 text-white px-2 py-1 rounded shadow">Mudar Pgto</button>
-                            <button onclick="enviar('${v.id}')" class="text-[10px] bg-slate-800 text-white px-2 py-1 rounded shadow w-full mt-1">📲 Enviar Link WhatsApp</button>
+                            <button onclick="enviarLink('${v.id}')" class="text-[10px] bg-slate-800 text-white px-2 py-1 rounded shadow w-full mt-1">📲 Enviar Link WhatsApp</button>
                         </div>
                     </div>
                 `;
@@ -133,37 +194,104 @@
             document.getElementById('count-pronto').innerText = stats.pronto;
         }
 
-        function mudar(id, status) {
+        function mudarStatus(id, status) {
             veiculos = veiculos.map(v => v.id === id ? {...v, status} : v);
             localStorage.setItem('dunga_jeep_patio', JSON.stringify(veiculos));
-            renderizar();
+            renderizarVeiculos();
         }
 
         function alternarPagamento(id) {
             veiculos = veiculos.map(v => v.id === id ? {...v, pagamento: v.pagamento === 'pago' ? 'pendente' : 'pago'} : v);
             localStorage.setItem('dunga_jeep_patio', JSON.stringify(veiculos));
-            renderizar();
+            renderizarVeiculos();
         }
 
-        function remover(id) {
+        function removerVeiculo(id) {
             if(confirm('Tem certeza que deseja excluir este veículo?')) {
                 veiculos = veiculos.filter(v => v.id !== id);
                 localStorage.setItem('dunga_jeep_patio', JSON.stringify(veiculos));
-                renderizar();
+                renderizarVeiculos();
             }
         }
 
-        // Função enviar melhorada: busca os dados pelo ID para evitar erros com textos longos
-        function enviar(id) {
+        function enviarLink(id) {
             const v = veiculos.find(v => v.id === id);
             if(!v) return;
-            
             const urlAtual = window.location.href;
             const urlBase = urlAtual.substring(0, urlAtual.lastIndexOf('/')) + '/cliente.html';
             const desc = v.descricao ? v.descricao : '';
-            
             const link = `${urlBase}?m=${encodeURIComponent(v.modelo)}&p=${encodeURIComponent(v.placa)}&s=${v.status}&d=${encodeURIComponent(v.previsao)}&v=${encodeURIComponent(v.valor)}&pg=${v.pagamento}&desc=${encodeURIComponent(desc)}`;
-            window.open(`https://wa.me/?text=${encodeURIComponent('Acompanhe o status e orçamento do seu Veículo: ' + link)}`, '_blank');
+            window.open(`https://wa.me/?text=${encodeURIComponent('Acompanhe o status e orçamento do seu Jeep: ' + link)}`, '_blank');
+        }
+
+        // ================= LÓGICA DE ESTOQUE =================
+        document.getElementById('formPeca').addEventListener('submit', function(e) {
+            e.preventDefault();
+            estoque.push({
+                id: Date.now().toString(),
+                nome: document.getElementById('nomePeca').value,
+                qtd: parseInt(document.getElementById('qtdPeca').value),
+                valor: parseFloat(document.getElementById('valorPeca').value)
+            });
+            localStorage.setItem('dunga_jeep_estoque', JSON.stringify(estoque));
+            this.reset();
+            renderizarEstoque();
+        });
+
+        function alterarQtd(id, valor) {
+            estoque = estoque.map(p => {
+                if (p.id === id) {
+                    let novaQtd = p.qtd + valor;
+                    if (novaQtd < 0) novaQtd = 0; // Impede estoque negativo
+                    return {...p, qtd: novaQtd};
+                }
+                return p;
+            });
+            localStorage.setItem('dunga_jeep_estoque', JSON.stringify(estoque));
+            renderizarEstoque();
+        }
+
+        function removerPeca(id) {
+            if(confirm('Tem certeza que deseja remover esta peça do estoque?')) {
+                estoque = estoque.filter(p => p.id !== id);
+                localStorage.setItem('dunga_jeep_estoque', JSON.stringify(estoque));
+                renderizarEstoque();
+            }
+        }
+
+        function renderizarEstoque() {
+            document.getElementById('lista-estoque').innerHTML = "";
+            let valorTotalGeral = 0;
+
+            estoque.forEach(p => {
+                const valorUnFormatado = parseFloat(p.valor).toLocaleString('pt-BR', { minimumFractionDigits: 2 });
+                const valorTotalPeca = p.qtd * p.valor;
+                valorTotalGeral += valorTotalPeca;
+                const corQtd = p.qtd <= 2 ? 'text-red-500' : 'text-emerald-600';
+
+                document.getElementById('lista-estoque').innerHTML += `
+                    <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
+                        <div class="flex justify-between items-start mb-2">
+                            <div>
+                                <strong class="text-sm block">${p.nome}</strong>
+                                <span class="text-[11px] text-slate-500">Valor Un: R$ ${valorUnFormatado}</span>
+                            </div>
+                            <button onclick="removerPeca('${p.id}')" class="text-red-400 font-bold ml-2">✕</button>
+                        </div>
+                        
+                        <div class="flex justify-between items-center bg-slate-50 p-2 rounded-lg border">
+                            <span class="text-xs font-bold ${corQtd}">Qtd: ${p.qtd}</span>
+                            <div class="flex gap-2">
+                                <button onclick="alterarQtd('${p.id}', -1)" class="bg-slate-300 text-slate-700 w-6 h-6 rounded flex items-center justify-center font-bold shadow">-</button>
+                                <button onclick="alterarQtd('${p.id}', 1)" class="bg-slate-700 text-white w-6 h-6 rounded flex items-center justify-center font-bold shadow">+</button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+
+            // Atualiza o visor de valor total
+            document.getElementById('valor-total-estoque').innerText = `R$ ${valorTotalGeral.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`;
         }
     </script>
 </body>
